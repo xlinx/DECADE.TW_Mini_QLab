@@ -36,7 +36,7 @@ import {
     LoginOutlined, ClockCircleOutlined, DashboardOutlined, MenuUnfoldOutlined, EditOutlined, SettingOutlined,
     EllipsisOutlined
 } from '@ant-design/icons';
-import {useStoreX} from "../model/StoreX.jsx";
+// import {useStoreX} from "../model/StoreX.jsx";
 import {ISOStringX, ISOStringX2} from "../model/xlinx.js";
 
 const {Timer} = Statistic;
@@ -58,7 +58,7 @@ Date.prototype.toISOString = function () {
         '.' + (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5);
     // + time_zone;
 };
-const MiniQ = ({group, gIndex, allAction, RX_JSON, defaultQ,onChange}) => {
+const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange}) => {
     const {setTX_JSON_CMD} = useStoreX();
 
     // 1. Initial State with LocalStorage Loading

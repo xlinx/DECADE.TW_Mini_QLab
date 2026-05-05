@@ -11,11 +11,38 @@ import {
 } from "@ant-design/icons";
 const { Search } = Input;
 const {TextArea} = Input;
-
 import MiniQ from "./MiniQ.jsx";
-import {ISOStringX} from "../model/xlinx.js";
-import {useStoreX} from "../model/StoreX.jsx";
+// import {useStoreX} from "../model/StoreX.jsx";
+import {create} from "zustand";
+import {immer} from "zustand/middleware/immer";
+export const useStoreX = create(immer((set) => ({
+    RX_JSON: {}
+})));
 
+export function ISOStringX(){
+    const date=new Date()
+    let pad =(n)=>(n < 10)?'0' + n:n;
+    let hours_offset = date.getTimezoneOffset() / 60;
+    let offset_date = date.setHours(date.getHours() - hours_offset);
+    let symbol = (hours_offset >= 0) ? "-" : "+";
+    // let time_zone = symbol+pad(Math.abs(hours_offset))+ ":00";
+
+    return date.getUTCFullYear() +
+        // '-' +
+        pad(date.getUTCMonth() + 1) +
+        // '-' +
+        pad(date.getUTCDate()) +
+        '_' +
+        pad(date.getUTCHours()) +
+        // ':' +
+        pad(date.getUTCMinutes()) +
+        // ':' +
+        pad(date.getUTCSeconds())
+    // +'.' +
+    // (date.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5);
+    // + time_zone;
+
+}
 const defaultQ = [
     {
         id: ISOStringX(),
@@ -172,7 +199,7 @@ const StaticHTML = () => {
                     // style={{ background: token.colorBgContainer }}
                     items={dataSource.map((e, i) => {
                         const child = (<div key={`decade_d1_${i}`}>
-                                <MiniQ group={e} gIndex={i} allAction={allAction} RX_JSON={RX_JSON} defaultQ={defaultQ} onChange={(e) => {
+                                <MiniQ group={e} gIndex={i} useStoreX={useStoreX} allAction={allAction} RX_JSON={RX_JSON} defaultQ={defaultQ} onChange={(e) => {
                                     console.log('change', e)
                                     let newDataSource = [...dataSource]
                                     newDataSource[i].gData=e
@@ -189,30 +216,30 @@ const StaticHTML = () => {
                                     <Space.Compact>
                                         <Space.Addon><GroupOutlined /> GroupName </Space.Addon>
                                         <Input
-                                               value={dataSource[i].gName}
-                                               // defaultValue={Object.keys(dataSource)[i]}
-                                               variant={'underlined'}
-                                               color={'purple'}
-                                               width={'120px'}
-                                               styles={{width:'120',background: 'transparent', border: 'none', color: '#fff'}}
-                                               onClick={(e) => {
-                                                   e.stopPropagation();
-                                               }}
-                                               onChange={
-                                                   (e) => {
-                                                       e.stopPropagation();
-                                                       console.log('change', e)
-                                                       let newDataSource = [...dataSource]
-                                                       // const oldKey=e.target.defaultValue
-                                                       // const newKey=e.target.value
-                                                       newDataSource[i].gName=e.target.value
-                                                       // delete newDataSource[oldKey]
-                                                       setDataSource(newDataSource)
-                                                       // if (!e.target.value.endsWith("/")) {
-                                                       //
-                                                       // }
-                                                   }
-                                               }
+                                            value={dataSource[i].gName}
+                                            // defaultValue={Object.keys(dataSource)[i]}
+                                            variant={'underlined'}
+                                            color={'purple'}
+                                            width={'120px'}
+                                            styles={{width:'120',background: 'transparent', border: 'none', color: '#fff'}}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                            }}
+                                            onChange={
+                                                (e) => {
+                                                    e.stopPropagation();
+                                                    console.log('change', e)
+                                                    let newDataSource = [...dataSource]
+                                                    // const oldKey=e.target.defaultValue
+                                                    // const newKey=e.target.value
+                                                    newDataSource[i].gName=e.target.value
+                                                    // delete newDataSource[oldKey]
+                                                    setDataSource(newDataSource)
+                                                    // if (!e.target.value.endsWith("/")) {
+                                                    //
+                                                    // }
+                                                }
+                                            }
                                         />
                                     </Space.Compact>
                                 </Space>
@@ -258,6 +285,17 @@ const StaticHTML = () => {
 
                     })}
                 />
+
+                {/*<Divider variant="dashed" style={{ borderColor: 'purple' }} dashed>*/}
+                {/*    Group1*/}
+                {/*</Divider>*/}
+                {/*<MiniQ group={1}/>*/}
+                {/*<Divider variant="dashed" style={{ borderColor: 'purple' }} dashed>*/}
+                {/*    Group2*/}
+                {/*</Divider>*/}
+                {/*<MiniQ group={2}/>*/}
+
+
             </Card>
             <Divider>DECADE.TW-debugMode=ON</Divider>
             <Card>
@@ -281,7 +319,28 @@ const StaticHTML = () => {
                         });
                     }}>Copy as JSON - Server Info</Button>
                 </Row>
-
+                {/*<Collapse*/}
+                {/*    style={{marginTop: '30px', background: '#101'}}*/}
+                {/*    bordered={true}*/}
+                {/*    defaultActiveKey={[]}*/}
+                {/*    expandIcon={({isActive}) => <CaretRightOutlined rotate={isActive ? 90 : 0}/>}*/}
+                {/*    // style={{ background: token.colorBgContainer }}*/}
+                {/*    items={[*/}
+                {/*        <>*/}
+                {/*            <Splitter>*/}
+                {/*                <Splitter.Panel defaultSize="50%" min="20%" max="70%">*/}
+                {/*                    <TextArea style={{padding: '10px', fontSize: '1em'}} rows={20}*/}
+                {/*                              placeholder={dataSource ? JSON.stringify(dataSource, null, 2) : 'No Data'}/>*/}
+                {/*                </Splitter.Panel>*/}
+                {/*                <Splitter.Panel>*/}
+                {/*                    <TextArea style={{padding: '10px', fontSize: '1em'}} rows={20}*/}
+                {/*                              placeholder={JSON.stringify(RX_JSON, null, 2)}/>*/}
+                {/*                </Splitter.Panel>*/}
+                {/*            </Splitter>*/}
+                {/*        </>*/}
+                {/*    ]}*/}
+                {/*>*/}
+                {/*</Collapse>*/}
 
             </Card>
         </>
