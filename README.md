@@ -1,6 +1,11 @@
 # DECADE.TW_Mini_QLab
 QLab is the industry-standard software for multimedia show control (audio, video, lighting) on macOS, now its avaiable on nodejs
+
+---Screenshot---
+![image](DECADE.TW-MINI-Qlab.png)
+---Video Demo---
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/PE2jOI2uq9E/0.jpg)](https://www.youtube.com/watch?v=PE2jOI2uq9E)
+
 ```bash
 npm install antd react react-dom 
 npm install decade.tw-mini-qlab
