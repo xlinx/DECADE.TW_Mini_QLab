@@ -1,7 +1,7 @@
 import React, {useState, useRef, useEffect} from 'react';
 import * as cron from 'cron';
-import { Cron } from 'react-js-cron'
-import 'react-js-cron/styles.css'
+
+
 import {
     Table,
     Button,
@@ -15,7 +15,7 @@ import {
     Progress,
     Switch,
     Upload,
-    message, Flex
+    message, Flex, Alert, Statistic, Row, Col, Popconfirm
 } from 'antd';
 import {
     PlusOutlined,
@@ -27,14 +27,23 @@ import {
     PlusCircleOutlined,
     RetweetOutlined,
     DownloadOutlined,
-    UploadOutlined, MinusCircleOutlined, DeleteRowOutlined, UsergroupDeleteOutlined
+    UploadOutlined,
+    MinusCircleOutlined,
+    DeleteRowOutlined,
+    UsergroupDeleteOutlined,
+    FieldTimeOutlined,
+    ScheduleOutlined,
+    LoginOutlined, ClockCircleOutlined, DashboardOutlined, MenuUnfoldOutlined, EditOutlined, SettingOutlined,
+    EllipsisOutlined
 } from '@ant-design/icons';
 import {useStoreX} from "../model/StoreX.jsx";
-import {ISOStringX} from "../model/xlinx.js";
+import {ISOStringX, ISOStringX2} from "../model/xlinx.js";
+
+const {Timer} = Statistic;
 
 const {Text} = Typography;
 Date.prototype.toISOString = function () {
-    let pad =(n)=>(n < 10)?'0' + n:n;
+    let pad = (n) => (n < 10) ? '0' + n : n;
     let hours_offset = this.getTimezoneOffset() / 60;
     let offset_date = this.setHours(this.getHours() - hours_offset);
     let symbol = (hours_offset >= 0) ? "-" : "+";
@@ -49,49 +58,30 @@ Date.prototype.toISOString = function () {
         '.' + (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5);
     // + time_zone;
 };
-const MiniQ = ({group,allAction}) => {
+const MiniQ = ({group, gIndex, allAction, RX_JSON, defaultQ,onChange}) => {
     const {setTX_JSON_CMD} = useStoreX();
 
-    const defaultQ=[
-        {
-            id: ISOStringX(),
-            number: '-1',
-            name: '/cue/god/',
-            wait: 1000,
-            cron: '* * * 1 2 3',
-            status: 'idle',
-            percent: 0
-        }
-    ]
-    let defaultQobj={}
-    defaultQobj[group]=defaultQ
-
     // 1. Initial State with LocalStorage Loading
-    const [dataSource, setDataSource] = useState(() => {
-        const saved = JSON.parse(localStorage.getItem('qlab_cues'));
-        if(saved){
-            return saved[group]?saved[group]:defaultQ
-        }else{
-            return defaultQ
-        }
-
-    });
+    const [dataSource, setDataSource] = useState(group.gData);
     const [nowQ, setnowQ] = useState(dataSource[0]);
     const [isRunning, setIsRunning] = useState(false);
     const [isLooping, setIsLooping] = useState(false);
+    const [isCron, setisCron] = useState(false);
+    const [isTC, setisTC] = useState(false);
+    const [RX_TC, setRX_TC] = useState({TS: 0, TS_DELTA: -9999, framerate: 0, string: '0:0:0:00'});
+
     const stopSignal = useRef(false);
 
-    // 2. Sync to LocalStorage on change
     useEffect(() => {
-        let saving = JSON.parse(localStorage.getItem('qlab_cues'));
-        console.log('saving',saving,Boolean(saving))
-        if(saving){
-            saving[group]= dataSource
-            localStorage.setItem('qlab_cues', JSON.stringify(saving));
-        }else{
-            localStorage.setItem('qlab_cues', JSON.stringify(defaultQobj));
+        if (RX_JSON.TC !== undefined) {
+            let o = {...RX_JSON.TC}
+            o.TS_DELTA = RX_JSON.TC.TS - Date.now()
+            setRX_TC(o)
         }
 
+    }, [RX_JSON]);
+    useEffect(() => {
+        onChange(dataSource)
 
     }, [dataSource]);
 
@@ -148,7 +138,7 @@ const MiniQ = ({group,allAction}) => {
                     if (stopSignal.current) return false;
                     const elapsed = Date.now() - startTime;
                     updateCueState(currentCue.id, {percent: Math.min(Math.floor((elapsed / currentCue.wait) * 100), 99)});
-                    await new Promise(r => setTimeout(r, 40));
+                    await new Promise(r => setTimeout(r, 100));
                 }
                 updateCueState(currentCue.id, {status: 'complete', percent: 100});
                 setTX_JSON_CMD(`${currentCue.name}` + Date.now())
@@ -179,6 +169,33 @@ const MiniQ = ({group,allAction}) => {
         }
     };
     const clockSeq = [0x1F55B, 0x1F550, 0x1F551, 0x1F552, 0x1F553, 0x1F554, 0x1F555, 0x1F556, 0x1F557, 0x1F558, 0x1F559, 0x1F55A, 0x1F55B]
+
+    // const { styles } = useStyle();
+    function formatMillis(millis) {
+        let totalSeconds = Math.floor(millis / 1000);
+        let hours = Math.floor(totalSeconds / 3600);
+        let minutes = Math.floor((totalSeconds % 3600) / 60);
+        let seconds = totalSeconds % 60;
+        minutes = String(minutes).padStart(2, '0');
+        seconds = String(seconds).padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+    }
+
+    function subTC(t1s, t2s) {
+        if (t1s === undefined || t2s === undefined)
+            return Number.NaN
+        const t1 = t1s.split(';')[0]
+        const t2 = t2s.split(';')[0]
+        const t1_arr = t1.split(':')
+        const t2_arr = t2.split(':')
+        const t1_arr_num = t1_arr.map(i => parseInt(i))
+        const t2_arr_num = t2_arr.map(i => parseInt(i))
+        const diff = t1_arr_num.map((i, idx) => i - t2_arr_num[idx])
+        // console.log(diff)
+        const r = ((diff[0] * 60 * 60) + (diff[1] * 60) + diff[2])
+        return r//(r>0?'+':'')+r+'sec'
+        // return diff.join(';')
+    }
 
     const columns = [
         {
@@ -212,40 +229,71 @@ const MiniQ = ({group,allAction}) => {
                 />
             )
         }
-
         , {
-            title: '定時 (分 時 日 月 週 年)',
+            title: <>
+
+                <LoginOutlined color={'green'}/> LTC Trigger
+
+                {/*<Tag style={{fontSize:'0.8em'}} color={'gold'}>{RX_TC.TS_DELTA.toString()}ms</Tag>*/}
+            </>,
+            dataIndex: 'timecode',
+            width: 150,
+            render: (v, r) => {
+                const tc_r = subTC(RX_JSON?.TC?.string || '0:0:0', v)
+
+                return <>
+                    <Input disabled={isTC} variant="outlined" value={v}
+                           onChange={e => updateCueState(r.id, {timecode: e.target.value})}
+                           style={{color: isTC ? '#1890ff' : '#999999', fontWeight: 'bold', textAlign: 'center'}}/>
+                    <Tag variant={tc_r > -10 && tc_r <= 0 ? 'solid' : 'outlined'} color={'blue'}>
+                        <FieldTimeOutlined/> Countdown= {tc_r > 0 ? '+' : ''}{tc_r}s </Tag>
+
+                </>
+            }
+        }
+        , {
+            title: <><FieldTimeOutlined/> 定時(秒分時日月週)
+                {/*<Tag variant={'solid'} color={'#000'}> NOW <DashboardOutlined/> {ISOStringX()} </Tag>*/}
+            </>,
             dataIndex: 'cron',
             width: 150,
             render: (v, r) => {
                 return <>
-                    <Input variant="outlined" value={v}
+                    <Input disabled={isCron} variant="outlined" value={v}
                            onChange={e => updateCueState(r.id, {cron: e.target.value})}
-                           style={{color: '#1890ff', fontWeight: 'bold' ,textAlign:'center'}}/>
-                    <Tag> {cron.validateCronExpression(v).valid ? cron.sendAt(v).toISO() : '??'} </Tag>
-
-
+                           style={{color: isCron ? '#1890ff' : '#999999', fontWeight: 'bold', textAlign: 'center'}}/>
+                    <Tag variant={'solid'}
+                         color={'black'}> NEXT <ScheduleOutlined/> {cron.validateCronExpression(v).valid ? cron.sendAt(v).toISO().split('.000')[0] : '??'}
+                    </Tag>
+                    <Tag variant={'solid'}
+                         color={'black'}> Count-Down <FieldTimeOutlined/> {cron.validateCronExpression(v).valid ? formatMillis(cron.timeout(v)) : '??'}
+                    </Tag>
+                    {/*<Countdown targetDate={ cron.sendAt(v).toISO()}/>*/}
                 </>
             }
         },
         {
-            title: 'Wait (ms)',
+            title: <><ClockCircleOutlined/> Wait(ms)</>,
             dataIndex: 'wait',
-            width: 120,
-            render: (v, r) => <InputNumber min={0} value={v} step={500}
-                                           onChange={val => updateCueState(r.id, {wait: val})}/>
+            width: 150,
+            render: (v, r) => <>
+                <InputNumber style={{textAlign: 'center'}}
+                             min={0} value={v} step={500} onChange={val => updateCueState(r.id, {wait: val})}/>
+                <Tag variant={'solid'}
+                     color={'black'}> {String.fromCodePoint(clockSeq[Math.round(r.percent / 100 * 12)])}️ {Math.round(r.percent / 100 * r.wait)}</Tag>
+            </>
         },
         {
             title: 'Progress',
             dataIndex: 'percent',
-            width: 250,
+            width: 150,
             render: (percent, record) => (
                 <Flex justify="space-around" align="center" style={{height: '100%'}}>
                     <Progress
                         percent={percent}
                         percentPosition={{align: 'center', type: 'inner'}}
                         steps={5}
-                        format={percent => `${percent.toString().padStart(3, '0')}% ${String.fromCodePoint(clockSeq[Math.round(percent / 100 * 12)])}️ ${Math.round(percent / 100 * record.wait)} `}
+                        format={percent => `${percent.toString().padStart(3, '0')}%  `}
                         size={[10, 20]}
                         status={record.status === 'running' ? 'active' : 'normal'}
                         strokeColor={record.status === 'complete' ? '#52c41a' : '#c110e9'}
@@ -257,30 +305,33 @@ const MiniQ = ({group,allAction}) => {
         {
             title: 'Actions', width: 180, render: (_, r, idx) => (
                 <Space>
-                    <Tooltip title="Insert Below"><Button icon={<PlusCircleOutlined/>} size="small" onClick={() => {
-                        const newData = [...dataSource];
-                        let newCue= {...defaultQ[0]}
-                        newCue.id=ISOStringX()
-                        newCue.name=newCue.name+new Date().toISOString()+'/'
-                        newData.splice(idx + 1, 0, newCue);
-                        setDataSource(newData);
-                    }}/></Tooltip>
+                    <Tooltip title="Insert Below">
+                        <Button icon={<PlusCircleOutlined/>} size="small" onClick={() => {
+                            const newData = [...dataSource];
+                            let newCue = {...defaultQ[0]}
+                            newCue.id = ISOStringX()
+                            newCue.name = newCue.name + new Date().toISOString() + '/'
+                            newData.splice(idx + 1, 0, newCue);
+                            setDataSource(newData);
+                        }}/></Tooltip>
                     <Button icon={<ArrowUpOutlined/>} size="small" disabled={idx === 0 || isRunning}
                             onClick={() => moveCue(idx, 'up')}/>
                     <Button icon={<ArrowDownOutlined/>} size="small"
                             disabled={idx === dataSource.length - 1 || isRunning} onClick={() => moveCue(idx, 'down')}/>
                     <Button danger icon={<DeleteOutlined/>} size="small"
                             onClick={() => setDataSource(prev => prev.filter(i => i.id !== r.id))}
-                            disabled={isRunning||dataSource.length===1}/>
+                            disabled={isRunning || dataSource.length === 1}/>
                 </Space>
             )
         }
     ];
-    function stopSequence(){
+
+    function stopSequence() {
         stopSignal.current = true;
         setIsRunning(false);
         setDataSource(prev => prev.map(i => ({...i, status: 'idle', percent: 0})))
     }
+
     useEffect(() => {
         switch (allAction) {
             case "GO":
@@ -293,34 +344,130 @@ const MiniQ = ({group,allAction}) => {
 
         }
     }, [allAction]);
+    useEffect(() => {
+
+        const nowMillis = Math.round(Date.now() / 1000)
+        dataSource.forEach((e, index) => {
+            if (isTC) {
+                const tc_r = subTC(RX_JSON?.TC?.string, e.timecode)
+                if (tc_r === 0) {
+                    e.status = 'running';
+                    console.log(new Date().toISOString(), '[OOO][TCCheck]', e.name, e.id, dataSource)
+                    setTX_JSON_CMD(`${e.name}` + nowMillis)
+                } else {
+                    e.status = 'idle';
+                }
+            }
+            if (isCron && cron.validateCronExpression(e.cron).valid) {
+                const cronNow = Math.round(cron.sendAt(e.cron).valueOf() / 1000)
+                // console.log('[?][cronCheck]',cronNow, nowMillis)
+                if (cronNow === nowMillis) {
+                    e.status = 'running';
+                    console.log(new Date().toISOString(), '[OOO][cronCheck]', cronNow, nowMillis, e.name, e.id, dataSource)
+
+                    setTX_JSON_CMD(`${e.name}` + nowMillis)
+                } else {
+                    e.status = 'idle';
+                }
+            }
+        })
+        // }, 1000);
+    }, [Math.round(Date.now() / 1000)]);
     return (
         <>
             <Card style={{background: '#141414', borderColor: 'rgb(95 56 2)', marginBottom: 20}}
+                  actions={[
+                      <span style={{fontSize:'1.3em'}}>
+                          <div style={{
+                              height: '14px',
+                              width: '5px',
+                              backgroundColor: (RX_TC.TS_DELTA < 1000 && RX_TC.TS_DELTA > -1000) ? (RX_TC.TS_DELTA % 2 === 0 ? '#2ecc71' : '#26b262') : '#fe0c71',
+                              borderRadius: '0%', display: 'inline-block'
+                          }}/>
+                        <LoginOutlined/> Time-Code(LTC)
+                          <Tag color={'blue'} style={{fontSize:'1em'}}>
+
+                          {RX_JSON?.TC?.string || 'hh:mm:ss:f'}
+                              <Tag style={{fontSize: '0.8em'}} color={'blue'}>{RX_TC.framerate || '?'}fps</Tag>
+                        </Tag>
+                      </span>,
+                      <span style={{fontSize:'1.3em'}} > NOW <DashboardOutlined/> {ISOStringX2()} </span>,
+                      <Space>
+                          {/*<SettingOutlined key="setting"/>*/}
+                          <Switch
+                              checkedChildren="Clock"
+                              unCheckedChildren="Clock"
+                              checked={isCron} onChange={setisCron}/>
+                          <Switch
+                              checkedChildren="TC/LTC"
+                              unCheckedChildren="TC/LTC"
+                              checked={isTC} onChange={setisTC}/>
+                          <Switch
+                              checkedChildren="LOOP"
+                              unCheckedChildren="LOOP"
+                              checked={isLooping} onChange={setIsLooping}/>
+
+                      </Space>
+                  ]}
                   title={
                       <div style={{display: 'flex', justifyContent: 'space-between'}}>
                           <Space size="middle">
+                              <Col>
+                                  {/*<Row style={{ marginBottom: 10}}>*/}
+                                  {/*    <Switch size="small"*/}
+                                  {/*            checkedChildren="Clock"*/}
+                                  {/*            unCheckedChildren="Clock"*/}
+                                  {/*            checked={isCron} onChange={setisCron}/>*/}
+                                  {/*    <Switch size="small"*/}
+                                  {/*            checkedChildren="TC/LTC"*/}
+                                  {/*            unCheckedChildren="TC/LTC"*/}
+                                  {/*            checked={isTC} onChange={setisTC}/>*/}
+                                  {/*    <Switch size="small"*/}
+                                  {/*            checkedChildren="LOOP"*/}
+                                  {/*            unCheckedChildren="LOOP"*/}
+                                  {/*            checked={isLooping} onChange={setIsLooping}/>*/}
+                                  {/*</Row>*/}
+                                  <Row>
+                                      <Space.Compact>
+                                          <Button color="purple" variant="solid" size="default"
+                                                  icon={<StepForwardOutlined/>}
+                                                  onClick={() => {
+                                                      runSequence()
+                                                  }}
+                                                  loading={isRunning}
+                                                  style={{
+                                                      // background: '#52c41a',
+                                                      // borderColor: '#52c41a',
+                                                      width: 130
+                                                  }}>GO</Button>
+                                          <Button danger size="default" icon={<StopOutlined/>} onClick={() => {
+                                              stopSequence()
+                                          }} disabled={!isRunning}>STOP</Button>
 
-                              <Space.Compact>
-                              <Button type="primary" size="large" icon={<StepForwardOutlined/>} onClick={()=>{runSequence()}}
-                                      loading={isRunning}
-                                      style={{background: '#52c41a', borderColor: '#52c41a', width: 130}}>GO-One</Button>
-                              <Button danger size="large" icon={<StopOutlined/>} onClick={() => {
-                                  stopSequence()
-                              }} disabled={!isRunning}>STOP</Button>
+                                      </Space.Compact>
+                                  </Row>
 
-                              </Space.Compact>
-                              <Switch
-                                  checkedChildren="LOOP:ON"
-                                  unCheckedChildren="LOOP:OFF"
-                                  checked={isLooping} onChange={setIsLooping}/>
-                              <Tag color={'purple'} style={{fontSize:'1.2em'}}>{`LAST-Q=${nowQ.name}`}</Tag>
+                              </Col>
+
+                              <Tag color={'purple'} style={{fontSize: '1.8em'}}><MenuUnfoldOutlined/> {`${nowQ.name}`}
+                              </Tag>
 
                           </Space>
 
-                          <Space >
-                                  {/*<Text style={{color: '#8c8c8c'}}><RetweetOutlined/> Loop</Text>*/}
-
-
+                          <Space>
+                              <Switch size="small"
+                                      checkedChildren="Clock"
+                                      unCheckedChildren="Clock"
+                                      checked={isCron} onChange={setisCron}/>
+                              <Switch size="small"
+                                      checkedChildren="TC/LTC"
+                                      unCheckedChildren="TC/LTC"
+                                      checked={isTC} onChange={setisTC}/>
+                              <Switch size="small"
+                                      checkedChildren="LOOP"
+                                      unCheckedChildren="LOOP"
+                                      checked={isLooping} onChange={setIsLooping}/>
+                              {/*<Text style={{color: '#8c8c8c'}}><RetweetOutlined/> Loop</Text>*/}
                               {/*<Space>*/}
                               {/*    <Space.Compact>*/}
                               {/*        <Button disabled={true}>Cue</Button>*/}
@@ -330,24 +477,17 @@ const MiniQ = ({group,allAction}) => {
                               {/*<Button danger icon={<DeleteOutlined/>}*/}
                               {/*        onClick={() => setDataSource(dataSource.shift())}*/}
                               {/*        disabled={isRunning}>Del Cue</Button>*/}
-                              <Space>
-                                  <Space.Compact>
-                                      <Button disabled={true}>JSON</Button>
-                                      <Button icon={<UploadOutlined/>} onClick={exportToJson}></Button>
-                                      <Upload beforeUpload={handleImport} showUploadList={false}>
-                                          <Button icon={<DownloadOutlined/>}></Button>
-                                      </Upload>
-                                  </Space.Compact>
-                              </Space>
-                              <Space>
-                                  <Space>
-                                      <Space.Compact block>
-                                          <Button color="orange" variant="outlined">Q-Group</Button>
-                                          <Button color="orange" variant="outlined" icon={<UsergroupDeleteOutlined />} onClick={() => setDataSource([...dataSource, defaultQ[0]])}>-</Button>
-                                      </Space.Compact>
-                                  </Space>
 
-                              </Space>
+                              {/*<Space>*/}
+                              {/*    <Space>*/}
+                              {/*        <Space.Compact block>*/}
+                              {/*            <Button color="orange" variant="outlined">Q-Group</Button>*/}
+                              {/*            <Button color="orange" variant="outlined" icon={<UsergroupDeleteOutlined/>}*/}
+                              {/*                    onClick={() => setDataSource([...dataSource, defaultQ[0]])}>-</Button>*/}
+                              {/*        </Space.Compact>*/}
+                              {/*    </Space>*/}
+
+                              {/*</Space>*/}
                           </Space>
                       </div>}
             >
