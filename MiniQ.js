@@ -37,7 +37,7 @@ import {
     EllipsisOutlined
 } from '@ant-design/icons';
 // import {useStoreX} from "../model/StoreX.jsx";
-import {ISOStringX, ISOStringX2} from "../model/xlinx.js";
+// import {ISOStringX, ISOStringX2} from "../model/xlinx.js";
 
 const {Timer} = Statistic;
 
@@ -58,6 +58,30 @@ Date.prototype.toISOString = function () {
         '.' + (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5);
     // + time_zone;
 };
+function ISOStringX() {
+    const date = new Date()
+    let pad = (n) => (n < 10) ? '0' + n : n;
+    let hours_offset = date.getTimezoneOffset() / 60;
+    let offset_date = date.setHours(date.getHours() - hours_offset);
+    let symbol = (hours_offset >= 0) ? "-" : "+";
+    // let time_zone = symbol+pad(Math.abs(hours_offset))+ ":00";
+
+    return date.getUTCFullYear() +
+        // '-' +
+        pad(date.getUTCMonth() + 1) +
+        // '-' +
+        pad(date.getUTCDate()) +
+        '_' +
+        pad(date.getUTCHours()) +
+        // ':' +
+        pad(date.getUTCMinutes()) +
+        // ':' +
+        pad(date.getUTCSeconds())
+    // +'.' +
+    // (date.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5);
+    // + time_zone;
+
+}
 const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange}) => {
     const {setTX_JSON_CMD} = useStoreX();
 
@@ -65,21 +89,13 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
     const [dataSource, setDataSource] = useState(group.gData);
     const [nowQ, setnowQ] = useState(dataSource[0]);
     const [isRunning, setIsRunning] = useState(false);
-    const [isLooping, setIsLooping] = useState(false);
-    const [isCron, setisCron] = useState(false);
-    const [isTC, setisTC] = useState(false);
-    const [RX_TC, setRX_TC] = useState({TS: 0, TS_DELTA: -9999, framerate: 0, string: '0:0:0:00'});
+
+    // const [isLooping, setIsLooping] = useState(group.isLooping);
+    // const [isCron, setisCron] = useState(group.isCron);
+    // const [isTC, setisTC] = useState(group.isTC);
 
     const stopSignal = useRef(false);
 
-    useEffect(() => {
-        if (RX_JSON.TC !== undefined) {
-            let o = {...RX_JSON.TC}
-            o.TS_DELTA = RX_JSON.TC.TS - Date.now()
-            setRX_TC(o)
-        }
-
-    }, [RX_JSON]);
     useEffect(() => {
         onChange(dataSource)
 
@@ -150,7 +166,7 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
         };
 
         let finishedNaturally = await execute();
-        while (isLooping && finishedNaturally && !stopSignal.current) {
+        while (group.isLooping && finishedNaturally && !stopSignal.current) {
             finishedNaturally = await execute();
         }
         setIsRunning(false);
@@ -242,9 +258,9 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
                 const tc_r = subTC(RX_JSON?.TC?.string || '0:0:0', v)
 
                 return <>
-                    <Input disabled={isTC} variant="outlined" value={v}
+                    <Input disabled={group.isTC} variant="outlined" value={v}
                            onChange={e => updateCueState(r.id, {timecode: e.target.value})}
-                           style={{color: isTC ? '#1890ff' : '#999999', fontWeight: 'bold', textAlign: 'center'}}/>
+                           style={{color: group.isTC ? '#1890ff' : '#999999', fontWeight: 'bold', textAlign: 'center'}}/>
                     <Tag variant={tc_r > -10 && tc_r <= 0 ? 'solid' : 'outlined'} color={'blue'}>
                         <FieldTimeOutlined/> Countdown= {tc_r > 0 ? '+' : ''}{tc_r}s </Tag>
 
@@ -252,16 +268,16 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
             }
         }
         , {
-            title: <><FieldTimeOutlined/> 定時(秒分時日月週)
+            title: <><FieldTimeOutlined/> Clock(S:M:H:D:M:W)
                 {/*<Tag variant={'solid'} color={'#000'}> NOW <DashboardOutlined/> {ISOStringX()} </Tag>*/}
             </>,
             dataIndex: 'cron',
-            width: 150,
+            width: 110,
             render: (v, r) => {
                 return <>
-                    <Input disabled={isCron} variant="outlined" value={v}
+                    <Input disabled={group.isCron} variant="outlined" value={v}
                            onChange={e => updateCueState(r.id, {cron: e.target.value})}
-                           style={{color: isCron ? '#1890ff' : '#999999', fontWeight: 'bold', textAlign: 'center'}}/>
+                           style={{color: group.isCron ? '#1890ff' : '#999999', fontWeight: 'bold', textAlign: 'center'}}/>
                     <Tag variant={'solid'}
                          color={'black'}> NEXT <ScheduleOutlined/> {cron.validateCronExpression(v).valid ? cron.sendAt(v).toISO().split('.000')[0] : '??'}
                     </Tag>
@@ -348,7 +364,7 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
 
         const nowMillis = Math.round(Date.now() / 1000)
         dataSource.forEach((e, index) => {
-            if (isTC) {
+            if (group.isTC) {
                 const tc_r = subTC(RX_JSON?.TC?.string, e.timecode)
                 if (tc_r === 0) {
                     e.status = 'running';
@@ -358,7 +374,7 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
                     e.status = 'idle';
                 }
             }
-            if (isCron && cron.validateCronExpression(e.cron).valid) {
+            if (group.isCron && cron.validateCronExpression(e.cron).valid) {
                 const cronNow = Math.round(cron.sendAt(e.cron).valueOf() / 1000)
                 // console.log('[?][cronCheck]',cronNow, nowMillis)
                 if (cronNow === nowMillis) {
@@ -377,35 +393,41 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
         <>
             <Card style={{background: '#141414', borderColor: 'rgb(95 56 2)', marginBottom: 20}}
                   actions={[
-                      <span style={{fontSize:'1.3em'}}>
-                          <div style={{
-                              height: '14px',
-                              width: '5px',
-                              backgroundColor: (RX_TC.TS_DELTA < 1000 && RX_TC.TS_DELTA > -1000) ? (RX_TC.TS_DELTA % 2 === 0 ? '#2ecc71' : '#26b262') : '#fe0c71',
-                              borderRadius: '0%', display: 'inline-block'
-                          }}/>
-                        <LoginOutlined/> Time-Code(LTC)
-                          <Tag color={'blue'} style={{fontSize:'1em'}}>
-
-                          {RX_JSON?.TC?.string || 'hh:mm:ss:f'}
-                              <Tag style={{fontSize: '0.8em'}} color={'blue'}>{RX_TC.framerate || '?'}fps</Tag>
-                        </Tag>
-                      </span>,
+                      // <span style={{fontSize:'1.3em'}}>
+                      //     <div style={{
+                      //         height: '14px',
+                      //         width: '5px',
+                      //         backgroundColor: (RX_TC.TS_DELTA < 1000 && RX_TC.TS_DELTA > -1000) ? (RX_TC.TS_DELTA % 2 === 0 ? '#2ecc71' : '#26b262') : '#fe0c71',
+                      //         borderRadius: '0%', display: 'inline-block'
+                      //     }}/>
+                      //     <Tag icon={<LoginOutlined/>} color={'blue'} style={{fontSize: '1em'}}>
+                      //       Time-Code(LTC)
+                      //     <Tag color={'blue'} style={{fontSize: '1em'}}>
+                      //       {RX_JSON?.TC?.string || 'hh:mm:ss:f'}
+                      //         <Tag style={{fontSize: '0.8em'}} color={'blue'}>{RX_TC.framerate || '?'}fps</Tag>
+                      //       </Tag>
+                      //       </Tag>
+                      // </span>,
                       <span style={{fontSize:'1.3em'}} > NOW <DashboardOutlined/> {ISOStringX2()} </span>,
                       <Space>
                           {/*<SettingOutlined key="setting"/>*/}
                           <Switch
                               checkedChildren="Clock"
                               unCheckedChildren="Clock"
-                              checked={isCron} onChange={setisCron}/>
+                              disabled={true}
+                              checked={group.isCron} />
                           <Switch
                               checkedChildren="TC/LTC"
                               unCheckedChildren="TC/LTC"
-                              checked={isTC} onChange={setisTC}/>
+                              disabled={true}
+
+                              checked={group.isTC} />
                           <Switch
                               checkedChildren="LOOP"
                               unCheckedChildren="LOOP"
-                              checked={isLooping} onChange={setIsLooping}/>
+                              disabled={true}
+
+                              checked={group.isLooping} />
 
                       </Space>
                   ]}
@@ -454,41 +476,7 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
 
                           </Space>
 
-                          <Space>
-                              <Switch size="small"
-                                      checkedChildren="Clock"
-                                      unCheckedChildren="Clock"
-                                      checked={isCron} onChange={setisCron}/>
-                              <Switch size="small"
-                                      checkedChildren="TC/LTC"
-                                      unCheckedChildren="TC/LTC"
-                                      checked={isTC} onChange={setisTC}/>
-                              <Switch size="small"
-                                      checkedChildren="LOOP"
-                                      unCheckedChildren="LOOP"
-                                      checked={isLooping} onChange={setIsLooping}/>
-                              {/*<Text style={{color: '#8c8c8c'}}><RetweetOutlined/> Loop</Text>*/}
-                              {/*<Space>*/}
-                              {/*    <Space.Compact>*/}
-                              {/*        <Button disabled={true}>Cue</Button>*/}
-                              {/*        <Button  icon={<PlusOutlined/>} onClick={() => setDataSource([...dataSource, defaultQ[0]])}>Add</Button>*/}
-                              {/*    </Space.Compact>*/}
-                              {/*</Space>*/}
-                              {/*<Button danger icon={<DeleteOutlined/>}*/}
-                              {/*        onClick={() => setDataSource(dataSource.shift())}*/}
-                              {/*        disabled={isRunning}>Del Cue</Button>*/}
 
-                              {/*<Space>*/}
-                              {/*    <Space>*/}
-                              {/*        <Space.Compact block>*/}
-                              {/*            <Button color="orange" variant="outlined">Q-Group</Button>*/}
-                              {/*            <Button color="orange" variant="outlined" icon={<UsergroupDeleteOutlined/>}*/}
-                              {/*                    onClick={() => setDataSource([...dataSource, defaultQ[0]])}>-</Button>*/}
-                              {/*        </Space.Compact>*/}
-                              {/*    </Space>*/}
-
-                              {/*</Space>*/}
-                          </Space>
                       </div>}
             >
 
