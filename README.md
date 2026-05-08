@@ -12,10 +12,13 @@ QLab is the industry-standard software for multimedia show control (audio, video
 <hr/>
 
 ## 💡Screenshot
-### [Main] Cue List
-![image](DECADE.TW-MINI-Qlab.png)
+### [Main] Cue List - HotKey/Cron/LTC/Loop
+![image](All.png)
 ### [add]Active Cue - side window 
 ![image](ActiveCue.png)
+### [add]HotKey
+![image](HotKey.png)
+
 ### Video Demo Youtube link - Click 
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/PE2jOI2uq9E/0.jpg)](https://www.youtube.com/watch?v=PE2jOI2uq9E)
 

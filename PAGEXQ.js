@@ -32,7 +32,7 @@ import {
     UserOutlined
 } from "@ant-design/icons";
 import MiniQ from "./MiniQ.jsx";
-// import {useStoreX} from "../model/StoreX.jsx";
+import {useStoreX} from "../model/StoreX.jsx";
 
 const { Header, Footer, Sider, Content } = Layout;
 
@@ -98,7 +98,8 @@ export function ISOStringX() {
 const defaultQ = [
     {
         id: ISOStringX(),
-        number: '-1',
+        number: '0',
+        hotKey:undefined,
         name: '/cue/god/',
         wait: 1000,
         timecode: "1:0:5:00",
@@ -112,6 +113,7 @@ const defaultGobj = {
     isLooping:true,
     isCron:false,
     isTC:false,
+    isHKey:false
 }
 const defaultG = [defaultGobj]
 
@@ -303,10 +305,21 @@ function LayoutContentX({dataSource,setDataSource,allAction}) {
                     </Tag>,
                     children: child,
                     extra: <Space>
+
                         <Space onClick={(e) => {
                             e.stopPropagation();
                         }}>
                             {/*<SettingOutlined key="setting"/>*/}
+                            <Switch
+                                checkedChildren="HKey"
+                                unCheckedChildren="HKey"
+                                checked={dataSource[i].isHKey}
+                                onChange={(e) => {
+                                    let newD=[...dataSource]
+                                    newD[i].isHKey=e
+                                    setDataSource(newD)
+                                }}
+                            />
                             <Switch
                                 checkedChildren="Clock"
                                 unCheckedChildren="Clock"
@@ -493,6 +506,7 @@ function TimeCodeTag({RX_JSON}){
         </>
     )
 }
+
 const StaticHTML = () => {
     checkStorage()
     const [sizes, setSizes] = React.useState([100,0]);
@@ -515,9 +529,11 @@ const StaticHTML = () => {
     const bColor='#212'
     return (
         <>
+
             <Card style={{margin: "10px", padding: "0px"}}
                   extra={<LayoutExtraX dataSource={dataSource} setDataSource={setDataSource}/>}
                   title={<>
+
                       <Tag style={{fontSize: '1.2em'}} variant={'solid'} color={"purple"}>DLab - SuperQ</Tag>
 
                       {/*<Tag icon={<LoginOutlined/>} color={'black'} style={{fontSize: '1em'}}>*/}
@@ -527,6 +543,7 @@ const StaticHTML = () => {
 
                       {/*    </Tag>*/}
                       {/*</Tag>*/}
+
                       <TimeCodeTag RX_JSON={RX_JSON} />
                   </>
                   }
@@ -543,6 +560,7 @@ const StaticHTML = () => {
                     </Splitter>
                 </>
             </Card>
+
             <LayoutFotterX dataSource={dataSource}/>
         </>
     );

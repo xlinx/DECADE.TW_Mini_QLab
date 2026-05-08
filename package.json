@@ -24,7 +24,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "node index.js"
+    "test": "node index.js",
+    "npm_publish": "npm version patch && npm publish"
   },
   "dependencies": {
     "@ant-design/icons": "^6.0.0",

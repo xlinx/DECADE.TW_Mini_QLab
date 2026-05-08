@@ -38,10 +38,42 @@ import {
 } from '@ant-design/icons';
 // import {useStoreX} from "../model/StoreX.jsx";
 // import {ISOStringX, ISOStringX2} from "../model/xlinx.js";
+const {TextArea} = Input;
 
 const {Timer} = Statistic;
 
 const {Text} = Typography;
+const enum_DATEXFORMAT = Object.freeze({
+    YYYMMDD: "YYMMDD",
+    MMDD: "MMDD",
+    YYYMMDD_hhmmssmillis: "YYY/MM/DD_hh:mm:ss:millis",
+    YYYMMDD_hhmmss_noSlash: "YYYMMDD_hh:mm:ss",
+    YYYMMDD_hhmmss: "YYY/MM/DD_hh:mm:ss",
+});
+function nowX(type) {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+    // Milliseconds can also be added if needed, padded to 3 digits
+    const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+    // 20251131.235959000
+    switch (type) {
+        case enum_DATEXFORMAT.MMDD:
+            return `${month}${day}`;
+        case enum_DATEXFORMAT.YYYMMDD:
+            return `${year}${month}${day}`;
+        case enum_DATEXFORMAT.YYYMMDD_hhmmss_noSlash:
+            return `${year}${month}${day}_${hours}:${minutes}:${seconds}`;
+        case enum_DATEXFORMAT.YYYMMDD_hhmmssmillis:
+            return `${year}/${month}/${day}_${hours}:${minutes}:${seconds}.${milliseconds}`;
+        case enum_DATEXFORMAT.YYYMMDD_hhmmss:
+            return `${year}/${month}/${day}_${hours}:${minutes}:${seconds}`;
+    }
+}
 Date.prototype.toISOString = function () {
     let pad = (n) => (n < 10) ? '0' + n : n;
     let hours_offset = this.getTimezoneOffset() / 60;
@@ -58,29 +90,23 @@ Date.prototype.toISOString = function () {
         '.' + (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5);
     // + time_zone;
 };
-function ISOStringX() {
-    const date = new Date()
-    let pad = (n) => (n < 10) ? '0' + n : n;
-    let hours_offset = date.getTimezoneOffset() / 60;
-    let offset_date = date.setHours(date.getHours() - hours_offset);
-    let symbol = (hours_offset >= 0) ? "-" : "+";
-    // let time_zone = symbol+pad(Math.abs(hours_offset))+ ":00";
+function KeyListenCompoment() {
+    const [eventKey, seteventKey] = useState(undefined);
+    useEffect(() => {
+        const handleKeyDown = (event) => {
+            // Check for specific keys like 'Enter', 'Escape', or 'a'
+            seteventKey(event.key)
+            if (event.key === 'Escape') {
+                console.log('Escape key pressed');
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []); // Empty dependency array means this runs once
 
-    return date.getUTCFullYear() +
-        // '-' +
-        pad(date.getUTCMonth() + 1) +
-        // '-' +
-        pad(date.getUTCDate()) +
-        '_' +
-        pad(date.getUTCHours()) +
-        // ':' +
-        pad(date.getUTCMinutes()) +
-        // ':' +
-        pad(date.getUTCSeconds())
-    // +'.' +
-    // (date.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5);
-    // + time_zone;
-
+    return <Tag color={''} variant={'fi'} style={{color:'#a800ff',fontSize:'1em'}}>Global Hot Key: {eventKey}</Tag>;
 }
 const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange}) => {
     const {setTX_JSON_CMD} = useStoreX();
@@ -135,7 +161,12 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
         reader.readAsText(file);
         return false; // Prevent auto-upload
     };
-
+    function runNow(currentCue){
+        updateCueState(currentCue.id, {status: 'complete', percent: 100});
+        setTX_JSON_CMD(`${currentCue.name}` + Date.now())
+        setnowQ(currentCue)
+        console.log(currentCue.name)
+    }
     // --- Sequence Engine ---
     async function runSequence() {
         if (isRunning) return;
@@ -156,10 +187,8 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
                     updateCueState(currentCue.id, {percent: Math.min(Math.floor((elapsed / currentCue.wait) * 100), 99)});
                     await new Promise(r => setTimeout(r, 100));
                 }
-                updateCueState(currentCue.id, {status: 'complete', percent: 100});
-                setTX_JSON_CMD(`${currentCue.name}` + Date.now())
-                setnowQ(currentCue)
-                console.log(currentCue.name)
+                runNow(currentCue)
+
 
             }
             return true;
@@ -215,6 +244,7 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
 
     const columns = [
         {
+            fixed: 'start',
             title: 'Status',
             dataIndex: 'status',
             width: 90,
@@ -222,30 +252,43 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
                 <Tag color="#108ee9">DONE</Tag> : <Tag>IDLE</Tag>)
         },
         {
+            sorter: true,
             title: 'No.',
             dataIndex: 'number',
             width: 100,
             render: (v, r) => <Input variant="borderless" value={v}
                                      onChange={e => updateCueState(r.id, {number: e.target.value})}
                                      style={{color: '#1890ff', fontWeight: 'bold'}}/>
+        }, {
+            sorter: true,
+            title: 'HKey.',
+            dataIndex: 'hotKey',
+            width: 100,
+            render: (v, r) => <Input variant="borderless" value={v} maxLength={1}
+                                     onChange={e => updateCueState(r.id, {hotKey: e.target.value})}
+                                     style={{color: '#a800ff', fontWeight: 'bold'}}/>
         },
         {
+            fixed: 'start',
+            width: 300,
             title: 'Command',
             dataIndex: 'name',
             render: (val, record) => (
-                <Input variant='filled' value={val} style={{color: '#fff'}}
-                       onChange={
-                           e => {
-                               if (!e.target.value.endsWith("/")) {
-                                   e.target.value += '/'
-                               }
-                               updateCueState(record.id, {name: e.target.value})
-                           }
-                       }
+                <TextArea variant='filled' defaultValue={val} style={{color: '#fef'}}
+
+                          onChange={
+                              e => {
+                                  if (!e.target.value.endsWith("/")) {
+                                      e.target.value += '/'
+                                  }
+                                  updateCueState(record.id, {name: e.target.value})
+                              }
+                          }
                 />
             )
         }
-        , {
+        ,{
+            sorter: true,
             title: <>
 
                 <LoginOutlined color={'green'}/> LTC Trigger
@@ -268,6 +311,7 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
             }
         }
         , {
+            sorter: true,
             title: <><FieldTimeOutlined/> Clock(S:M:H:D:M:W)
                 {/*<Tag variant={'solid'} color={'#000'}> NOW <DashboardOutlined/> {ISOStringX()} </Tag>*/}
             </>,
@@ -289,9 +333,10 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
             }
         },
         {
-            title: <><ClockCircleOutlined/> Wait(ms)</>,
+            // title: <><ClockCircleOutlined/> Wait(ms)</>,
+            title:'Wait(ms)',
             dataIndex: 'wait',
-            width: 150,
+
             render: (v, r) => <>
                 <InputNumber style={{textAlign: 'center'}}
                              min={0} value={v} step={500} onChange={val => updateCueState(r.id, {wait: val})}/>
@@ -300,11 +345,12 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
             </>
         },
         {
+            fixed: 'end',
             title: 'Progress',
             dataIndex: 'percent',
-            width: 150,
+            // width: 40,
             render: (percent, record) => (
-                <Flex justify="space-around" align="center" style={{height: '100%'}}>
+                <Space vertical={true}>
                     <Progress
                         percent={percent}
                         percentPosition={{align: 'center', type: 'inner'}}
@@ -313,20 +359,23 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
                         size={[10, 20]}
                         status={record.status === 'running' ? 'active' : 'normal'}
                         strokeColor={record.status === 'complete' ? '#52c41a' : '#c110e9'}
-                        showInfo={true}
+                        showInfo={false}
                     />
-                </Flex>
+                    <Tag>{percent}%</Tag>
+                </Space>
             )
         },
         {
-            title: 'Actions', width: 180, render: (_, r, idx) => (
+            fixed: 'end',
+            title: 'Actions', width: 150, render: (_, r, idx) => (
                 <Space>
                     <Tooltip title="Insert Below">
                         <Button icon={<PlusCircleOutlined/>} size="small" onClick={() => {
                             const newData = [...dataSource];
                             let newCue = {...defaultQ[0]}
-                            newCue.id = ISOStringX()
-                            newCue.name = newCue.name + new Date().toISOString() + '/'
+                            newCue.id = nowX(enum_DATEXFORMAT.YYYMMDD_hhmmssmillis)
+                            newCue.number = group.gData.length
+                            newCue.name = newCue.name + nowX(enum_DATEXFORMAT.YYYMMDD_hhmmss_noSlash) + '/'
                             newData.splice(idx + 1, 0, newCue);
                             setDataSource(newData);
                         }}/></Tooltip>
@@ -408,6 +457,7 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
                       //       </Tag>
                       //       </Tag>
                       // </span>,
+                      <KeyListenCompoment/>,
                       <span style={{fontSize:'1.3em'}} > NOW <DashboardOutlined/> {ISOStringX2()} </span>,
                       <Space>
                           {/*<SettingOutlined key="setting"/>*/}
@@ -481,7 +531,7 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
             >
 
 
-                <Table dataSource={dataSource} columns={columns} rowKey="id" pagination={false}/>
+                <Table dataSource={dataSource} scroll={{ x: 'max-content' }} columns={columns} rowKey="id" pagination={false}/>
             </Card>
 
             {/*      <style>{`*/}
