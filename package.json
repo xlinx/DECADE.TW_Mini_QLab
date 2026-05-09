@@ -28,16 +28,15 @@
     "npm_publish": "npm version patch && npm publish"
   },
   "dependencies": {
+    "js-yaml": "^4.1.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "@ant-design/icons": "^6.0.0",
-    "@aws-sdk/client-dynamodb": "^3.922.0",
     "antd": "6.3.3",
     "antd-mobile-icons": "^0.3.0",
     "antd-style": "^4.1.0",
     "cron": "^4.4.0",
     "immer": "^10.1.1",
-    "js-yaml": "^4.1.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
