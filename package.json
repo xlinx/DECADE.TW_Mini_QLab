@@ -1,6 +1,6 @@
 {
   "name": "mini-qlab",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "description": "QLab is the industry-standard software for multimedia show control (audio, video, lighting) on macOS, now its avaiable on nodejs",
   "keywords": [
     "qlab",
