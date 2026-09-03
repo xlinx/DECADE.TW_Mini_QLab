@@ -1,11 +1,11 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
-    body {
-        @apply min-h-screen bg-zinc-950 text-zinc-100 antialiased;
-    }
-
-    button, input, textarea, select {
-        @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400;
-    }
+  :root { color-scheme: light; }
+  :root.dark { color-scheme: dark; }
+  body { @apply m-0 min-w-[320px] bg-slate-100 font-sans antialiased dark:bg-slate-950; }
+  button, label, input { -webkit-tap-highlight-color: transparent; }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
 }
