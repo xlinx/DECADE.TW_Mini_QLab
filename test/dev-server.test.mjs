@@ -33,4 +33,10 @@ test('npm run dev serves the application', async (t) => {
     assert.equal(styles.status, 200);
     assert.match(await styles.text(), /--tw-/);
 
+    for (const path of ['/src/components/ui/index.jsx', '/src/components/ui/ToastProvider.jsx']) {
+        const response = await fetch(`http://127.0.0.1:${port}${path}`);
+        assert.equal(response.status, 200, `${path} should compile through Vite`);
+        assert.match(await response.text(), /export/);
+    }
+
 });
