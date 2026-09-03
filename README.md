@@ -6,14 +6,14 @@ QLab is the industry-standard software for multimedia show control (audio, video
 ## 💡Update Log
 * [added] | 🟢 standalone Mini-QLab App by Electron
   * mac(arm64|M1-M5/intel)  
-    * [mini-qlab-1.0.0-arm64.dmg](https://github.com/xlinx/DECADE.TW_Mini_QLab/app-bin) 
-    * [mini-qlab-1.0.0-intel64.dmg](https://github.com/xlinx/DECADE.TW_Mini_QLab/app-bin)
+    * [mini-qlab-1.0.0-arm64.dmg](https://github.com/xlinx/DECADE.TW_Mini_QLab/tree/main/app-bin) 
+    * [mini-qlab-1.0.0-intel64.dmg](https://github.com/xlinx/DECADE.TW_Mini_QLab/tree/main/app-bin)
   * win(arm64/intel64)  
-    * [mini-qlab.arm64.exe](https://github.com/xlinx/DECADE.TW_Mini_QLab/app-bin) 
-    * [mini-qlab.intel64.exe](https://github.com/xlinx/DECADE.TW_Mini_QLab/app-bin)
+    * [mini-qlab.arm64.exe](https://github.com/xlinx/DECADE.TW_Mini_QLab/tree/main/app-bin) 
+    * [mini-qlab.intel64.exe](https://github.com/xlinx/DECADE.TW_Mini_QLab/tree/main/app-bin)
   * linux(snap/AppImage)  
-    * [mini-qlab.snap](https://github.com/xlinx/DECADE.TW_Mini_QLab/app-bin)
-    * [mini-qlab.AppImage](https://github.com/xlinx/DECADE.TW_Mini_QLab/app-bin)
+    * [mini-qlab.snap](https://github.com/xlinx/DECADE.TW_Mini_QLab/tree/main/app-bin)
+    * [mini-qlab.AppImage](https://github.com/xlinx/DECADE.TW_Mini_QLab/tree/main/app-bin)
 * [adding] | 🟠 Hotkey by USB-HID (No need to focus on window)
 * [adding] | 🟠 Hotkey (need focus on window)
 * [adding] | 🟠 [TX] TimeCode (LTC)
@@ -42,8 +42,8 @@ QLab is the industry-standard software for multimedia show control (audio, video
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/PE2jOI2uq9E/0.jpg)](https://www.youtube.com/watch?v=PE2jOI2uq9E)
 
 ```bash
-npm install antd react react-dom 
-npm install decade.tw-mini-qlab
+npm install
+npm run dev
 ```
 
 ### TimeCode input init Audio Device

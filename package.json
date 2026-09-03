@@ -22,18 +22,14 @@
   "license": "ISC",
   "author": "YSLin",
   "type": "module",
-  "main": "PAGEXQ.js",
+  "main": "PAGEXQ.jsx",
   "scripts": {
     "dev": "vite",
     "test": "node --test",
     "npm_publish": "npm version patch && npm publish"
   },
   "dependencies": {
-    "@ant-design/icons": "^6.3.4",
     "@tailwindcss/vite": "^4.3.3",
-    "antd": "^6.6.2",
-    "antd-mobile-icons": "^0.3.0",
-    "antd-style": "^4.1.0",
     "cron": "^4.4.0",
     "immer": "^10.1.1",
     "js-yaml": "^4.1.0",

@@ -1,20 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {
-    Button,
-    Card,
-    Col,
-    Collapse,
-    Divider,
-    Input,
-    Layout,
-    message,
-    Row,
-    Space,
-    Splitter, Switch,
-    Table,
-    Tag,
-    Upload
-} from "antd";
+import { Button, Card, Col, Collapse, Divider, Input, Layout, message, Row, Space, Splitter, Switch, Table, Tag, Upload } from "./src/components/legacy-ui.jsx";
 import {
     ArrowDownOutlined,
     ArrowUpOutlined,
@@ -30,9 +15,10 @@ import {
     UsergroupAddOutlined,
     UsergroupDeleteOutlined,
     UserOutlined
-} from "@ant-design/icons";
+} from "./src/components/icons.jsx";
 import MiniQ from "./MiniQ.jsx";
-import {useStoreX} from "../model/StoreX.jsx";
+import { create } from "zustand";
+import { immer } from "zustand/middleware/immer";
 
 const { Header, Footer, Sider, Content } = Layout;
 
@@ -141,6 +127,7 @@ function LayoutHeader({setallAction,setSizes }) {
     const [enabled, setEnabled] = React.useState(false);
 
     return (
+        <>
         <Row justify="space-between">
             <Col>
                 <Space.Compact block>
@@ -174,6 +161,7 @@ function LayoutHeader({setallAction,setSizes }) {
                 {/*}}>Active-Cue-Panel</Button>*/}
             </Col>
         </Row>
+        </>
     )
 
 }
@@ -526,7 +514,7 @@ const StaticHTML = () => {
         localStorage.setItem('qlab_cues', JSON.stringify(dataSource))
 
     }, [dataSource])
-    const bColor='#212'
+
     return (
         <>
 

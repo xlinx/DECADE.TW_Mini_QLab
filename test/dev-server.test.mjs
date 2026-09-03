@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 test('npm run dev serves the application', async (t) => {
@@ -37,6 +38,15 @@ test('npm run dev serves the application', async (t) => {
         const response = await fetch(`http://127.0.0.1:${port}${path}`);
         assert.equal(response.status, 200, `${path} should compile through Vite`);
         assert.match(await response.text(), /export/);
+    }
+
+    for (const source of ['PAGEXQ.jsx', 'MiniQ.jsx']) {
+        assert.doesNotMatch(await readFile(source, 'utf8'), /from ['"](?:antd|@ant-design\/icons)['"]/);
+    }
+
+    const manifest = await import('../package.json', { with: { type: 'json' } });
+    for (const name of ['antd', '@ant-design/icons', 'antd-mobile-icons', 'antd-style']) {
+        assert.equal(manifest.default.dependencies?.[name], undefined, `${name} must not be installed`);
     }
 
 });

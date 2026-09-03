@@ -2,21 +2,7 @@ import React, {useState, useRef, useEffect} from 'react';
 import * as cron from 'cron';
 
 
-import {
-    Table,
-    Button,
-    Space,
-    InputNumber,
-    Input,
-    Typography,
-    Card,
-    Tag,
-    Tooltip,
-    Progress,
-    Switch,
-    Upload,
-    message, Flex, Alert, Statistic, Row, Col, Popconfirm
-} from 'antd';
+import { Table, Button, Space, InputNumber, Input, Typography, Card, Tag, Tooltip, Progress, Switch, Upload, message, Flex, Alert, Statistic, Row, Col } from './src/components/legacy-ui.jsx';
 import {
     PlusOutlined,
     DeleteOutlined,
@@ -35,7 +21,7 @@ import {
     ScheduleOutlined,
     LoginOutlined, ClockCircleOutlined, DashboardOutlined, MenuUnfoldOutlined, EditOutlined, SettingOutlined,
     EllipsisOutlined
-} from '@ant-design/icons';
+} from './src/components/icons.jsx';
 // import {useStoreX} from "../model/StoreX.jsx";
 // import {ISOStringX, ISOStringX2} from "../model/xlinx.js";
 const {TextArea} = Input;
@@ -458,7 +444,9 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
                       //       </Tag>
                       // </span>,
                       <KeyListenCompoment/>,
-                      <span style={{fontSize:'1.3em'}} > NOW <DashboardOutlined/> {ISOStringX2()} </span>,
+                      <span style={{fontSize:'1.3em'}} > NOW <DashboardOutlined/>
+                          {/*{ISOStringX()} */}
+                      </span>,
                       <Space>
                           {/*<SettingOutlined key="setting"/>*/}
                           <Switch
@@ -518,19 +506,12 @@ const MiniQ = ({group, gIndex, useStoreX,allAction, RX_JSON, defaultQ,onChange})
 
                                       </Space.Compact>
                                   </Row>
-
                               </Col>
-
                               <Tag color={'purple'} style={{fontSize: '1.8em'}}><MenuUnfoldOutlined/> {`${nowQ.name}`}
                               </Tag>
-
                           </Space>
-
-
                       </div>}
             >
-
-
                 <Table dataSource={dataSource} scroll={{ x: 'max-content' }} columns={columns} rowKey="id" pagination={false}/>
             </Card>
 
