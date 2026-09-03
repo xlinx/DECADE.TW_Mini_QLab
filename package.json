@@ -1,6 +1,6 @@
 {
   "name": "mini-qlab",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "QLab is the industry-standard software for multimedia show control (audio, video, lighting) on macOS, now its avaiable on nodejs",
   "keywords": [
     "qlab",
@@ -22,21 +22,25 @@
   "license": "ISC",
   "author": "YSLin",
   "type": "module",
-  "main": "index.js",
+  "main": "PAGEXQ.js",
   "scripts": {
-    "test": "node index.js",
+    "dev": "vite",
+    "test": "node --test",
     "npm_publish": "npm version patch && npm publish"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "@ant-design/icons": "^6.0.0",
-    "antd": "6.3.3",
+    "@ant-design/icons": "^6.3.4",
+    "@tailwindcss/vite": "^4.3.3",
+    "antd": "^6.6.2",
     "antd-mobile-icons": "^0.3.0",
     "antd-style": "^4.1.0",
     "cron": "^4.4.0",
     "immer": "^10.1.1",
+    "js-yaml": "^4.1.0",
+    "lucide-react": "^1.40.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tailwindcss": "^4.3.3",
     "zustand": "^5.0.6"
   },
   "devDependencies": {

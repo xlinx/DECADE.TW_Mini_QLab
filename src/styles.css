@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+@layer base {
+    body {
+        @apply min-h-screen bg-zinc-950 text-zinc-100 antialiased;
+    }
+
+    button, input, textarea, select {
+        @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-400;
+    }
+}
