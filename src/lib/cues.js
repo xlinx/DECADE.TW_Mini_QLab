@@ -1,4 +1,5 @@
 export const STORAGE_KEY = 'qlab_cues';
+export const TX_STORE_KEY = 'TX_JSON_CMD';
 let fallbackId = 0;
 
 function id(prefix) {
@@ -15,7 +16,8 @@ export function createCue(overrides = {}) {
   return {
     id: overrides.id || id('cue'), number: String(overrides.number ?? '1'), hotkey: String(overrides.hotkey ?? '').slice(0, 1),
     command: String(overrides.command ?? ''), ltcTrigger: String(overrides.ltcTrigger ?? ''), cron: String(overrides.cron ?? ''),
-    waitMs: Math.max(0, Number(overrides.waitMs) || 1000), status: 'IDLE', progress: 0
+    beforeWaitMs: Math.max(0, Number(overrides.beforeWaitMs) || 0), afterWaitMs: Math.max(0, Number(overrides.afterWaitMs) || 0),
+    status: 'IDLE', beforeProgress: 0, afterProgress: 0, startedAt: null
   };
 }
 
@@ -30,7 +32,7 @@ export function createGroup(overrides = {}) {
 }
 
 export function createDefaultGroups() {
-  return [createGroup({ name: 'Main Sequence', cues: [createCue({ number: '1', command: 'welcome/', waitMs: 500 })] })];
+  return [createGroup({ name: 'Main Sequence', cues: [createCue({ number: '1', command: 'welcome/', afterWaitMs: 500 })] })];
 }
 
 export function hydrateGroups(value) {
@@ -42,7 +44,7 @@ export function hydrateGroups(value) {
 }
 
 export function toPersistedGroups(groups) {
-  return groups.map(({ cues, ...group }) => ({ ...group, cues: cues.map(({ status, progress, ...cue }) => cue) }));
+  return groups.map(({ cues, ...group }) => ({ ...group, cues: cues.map(({ status, beforeProgress, afterProgress, startedAt, ...cue }) => cue) }));
 }
 
 export function readStoredGroups(storage) {
@@ -52,5 +54,15 @@ export function readStoredGroups(storage) {
 
 export function writeStoredGroups(storage, groups) {
   try { storage?.setItem(STORAGE_KEY, JSON.stringify(toPersistedGroups(groups))); return true; }
+  catch { return false; }
+}
+
+export function readTxStore(storage) {
+  try { const raw = storage?.getItem(TX_STORE_KEY); return raw ? JSON.parse(raw) : null; }
+  catch { return null; }
+}
+
+export function writeTxStore(storage, entry) {
+  try { storage?.setItem(TX_STORE_KEY, JSON.stringify(entry)); return true; }
   catch { return false; }
 }

@@ -5,9 +5,15 @@ It runs cue groups manually, sequentially, from cron schedules, browser
 hotkeys, or externally supplied timecode. Output is delivered through an event
 callback so the host application can connect its own OSC, MIDI, WebSocket, or
 device transport.
+
+- try online: https://www.decade.tw/qlab
+- with websocket support 
+  - default ws send to 127.0.0.1 port 8080
+- udp/osc u need implement by npm on ur code
 <hr/>
 
 ## 💡Update Log
+* [added] | 🟢 add websocket support
 * [modify] | remove antd lib
 * [added] | 🟢 standalone Mini-QLab App by Electron
     * mac(arm64|M1-M5/intel)
@@ -32,6 +38,7 @@ device transport.
 <hr/>
 
 ## 💡Screenshot
+![websocket.png](imges/websocket.png)
 ### [Main] Mini-Q standalone App (mac/win/linux)
 ![image](imges/mini-q-electron.png)
 ### [Main] Cue List - HotKey/Cron/LTC/Loop

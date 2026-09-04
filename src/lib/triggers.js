@@ -9,6 +9,12 @@ export function isCronDue(expression, date) {
   } catch { return false; }
 }
 
+export function nextCronRun(expression, from = new Date()) {
+  if (!expression?.trim()) return null;
+  try { return CronExpressionParser.parse(expression, { currentDate: from }).next().toDate(); }
+  catch { return null; }
+}
+
 export function createTriggerGate() {
   const seen = new Map();
   return {

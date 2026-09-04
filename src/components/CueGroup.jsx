@@ -2,7 +2,7 @@ import { CueTable } from './CueTable.jsx';
 
 const compact = 'min-h-11 rounded-lg border border-slate-300 px-3 text-sm font-bold transition hover:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 dark:border-slate-700';
 
-export function CueGroup({ group, index, lastKey, onGroupChange, onGo, onStop, onMove, onRemove, onCueChange, onCueBlur, onCueInsert, onCueMove, onCueRemove }) {
+export function CueGroup({ group, index, lastKey, now, onGroupChange, onGo, onStop, onMove, onRemove, onCueChange, onCueBlur, onCueInsert, onCueMove, onCueRemove }) {
   const modes = [['clockEnabled','Clock'],['timecodeEnabled','TC/LTC'],['loopEnabled','Loop'],['hotkeyEnabled','Hotkey']];
   return <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900" aria-label={`Cue group ${group.name}`}>
     <div className="flex flex-wrap items-center gap-2 p-3">
@@ -13,7 +13,7 @@ export function CueGroup({ group, index, lastKey, onGroupChange, onGo, onStop, o
       <button className={`${compact} border-emerald-500 bg-emerald-500 text-white hover:bg-emerald-600`} aria-label={`GO ${group.name}`} onClick={onGo}>GO</button>
       <button className={`${compact} border-rose-500 bg-rose-500 text-white hover:bg-rose-600`} aria-label={`STOP ${group.name}`} onClick={onStop}>STOP</button>
     </div>
-    {group.expanded && <CueTable cues={group.cues} onChange={onCueChange} onBlurCommand={onCueBlur} onInsert={onCueInsert} onMove={onCueMove} onRemove={onCueRemove} />}
+    {group.expanded && <CueTable cues={group.cues} now={now} onChange={onCueChange} onBlurCommand={onCueBlur} onInsert={onCueInsert} onMove={onCueMove} onRemove={onCueRemove} />}
     <footer className="flex flex-wrap gap-3 border-t border-slate-200 bg-slate-50 px-4 py-2 font-mono text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-950/60 dark:text-slate-400"><span>GROUP {index + 1}</span><span>MODES {modes.filter(([f]) => group[f]).map(([,l]) => l).join(' · ') || 'MANUAL'}</span><span>KEY {lastKey || '—'}</span></footer>
   </section>;
 }
