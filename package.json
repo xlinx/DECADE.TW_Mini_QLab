@@ -1,6 +1,6 @@
 {
   "name": "mini-qlab",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "type": "module",
   "description": "Browser-based cue-list controller for React",
   "files": ["dist"],

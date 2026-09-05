@@ -38,7 +38,8 @@ device transport.
 <hr/>
 
 ## 💡Screenshot
-![websocket.png](imges/websocket.png)
+- try online: https://www.decade.tw/qlab
+![timeline.png](imges/timeline.png)
 ### [Main] Mini-Q standalone App (mac/win/linux)
 ![image](imges/mini-q-electron.png)
 ### [Main] Cue List - HotKey/Cron/LTC/Loop
