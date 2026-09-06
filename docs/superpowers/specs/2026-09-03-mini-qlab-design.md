@@ -76,12 +76,12 @@ types are `sequence:started`, `sequence:completed`, `sequence:stopped`, and
 
 ## Component interface
 
-```jsx
+ 
 <MiniQLab
   onEvent={(event) => send(event)}
   rxJson={{ TC: { string: '01:00:00:00' } }}
 />
-```
+ 
 
 The default export uses local storage by default. Optional `initialGroups`
 provides a starting configuration only when no stored configuration exists.
