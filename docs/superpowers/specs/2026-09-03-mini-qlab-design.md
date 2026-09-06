@@ -77,10 +77,7 @@ types are `sequence:started`, `sequence:completed`, `sequence:stopped`, and
 ## Component interface
 
  
-<MiniQLab
-  onEvent={(event) => send(event)}
-  rxJson={{ TC: { string: '01:00:00:00' } }}
-/>
+ 
  
 
 The default export uses local storage by default. Optional `initialGroups`
