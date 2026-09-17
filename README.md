@@ -6,14 +6,18 @@ hotkeys, or externally supplied timecode. Output is delivered through an event
 callback so the host application can connect its own OSC, MIDI, WebSocket, or
 device transport.
 
+Each Audio cue can select one local MP3 or WAV track and Play, Pause, or Stop
+only that track. Its full waveform appears on the timeline. These files are played only on the device: they
+are never uploaded or sent through WebSocket, and must be selected again after
+a page reload or cue-list import.
+
 - try online: https://www.decade.tw/qlab
-- with websocket support 
-  - default ws send to 127.0.0.1 port 8080
+- with websocket support
+    - default ws send to 127.0.0.1 port 8080
 - udp/osc u need implement by npm on ur code
 <hr/>
 
 ## 💡Update Log
-* [added] | 🟢 add timeline
 * [added] | 🟢 add websocket support
 * [modify] | remove antd lib
 * [added] | 🟢 standalone Mini-QLab App by Electron
@@ -38,12 +42,17 @@ device transport.
 
 <hr/>
 
-## 💡Screenshot 
-- online-demo https://www.decade.tw/qlab
-<hr>
-
-![timeline.png](imges/timeline.png)
- 
+## 💡Screenshot
+- try online: https://www.decade.tw/qlab
+  ![websocket.png](imges/websocket.png)
+### [Main] Mini-Q standalone App (mac/win/linux)
+![image](imges/mini-q-electron.png)
+### [Main] Cue List - HotKey/Cron/LTC/Loop
+![image](imges/All.png)
+### [add]Active Cue - side window
+![image](imges/ActiveCue.png)
+### [add]HotKey
+![image](imges/HotKey.png)
 ### [add] LTC - Select Audio Device
 ![image](imges/SelectAD.png)
 
@@ -56,7 +65,7 @@ device transport.
 initAudioDevice({deviceName: 'aggX1',onFrame:onFrame});
 
 ```
- 
+
 <hr/>
 
 ## Library usage
@@ -115,3 +124,30 @@ npm run build
     * https://civitai.com/articles/7090/share-sd-img-to-3rd-software-gpu-share-memory-realtime-spout-or-syphon
 * DECADE.TW
     * https://decade.tw
+
+## Library usage
+
+```jsx
+import MiniQLab from 'mini-qlab';
+import 'mini-qlab/styles.css';
+
+export function ShowControl() {
+  return (
+    <MiniQLab
+      rxJson={{ TC: { string: '01:00:00:00' } }}
+      onEvent={(event) => {
+        if (event.type === 'cue:dispatched') {
+          console.log(event.source, event.command);
+        }
+      }}
+    />
+  );
+}
+```
+
+`onEvent` receives sequence lifecycle events and cue dispatches. Dispatch
+sources are `sequence`, `cron`, `timecode`, and `hotkey`. `rxJson` is optional;
+provide `RX_JSON.TC.string` in that shape to use TC/LTC triggers.
+
+See the bilingual [Mini QLab manual](./mini-qlab.manual.md) for complete
+controls, configuration, and limitations.

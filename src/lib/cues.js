@@ -12,9 +12,17 @@ export function normalizeCommand(value) {
   return command ? `${command}/` : '';
 }
 
+export function normalizeBackgroundColor(value) {
+  const color = String(value ?? '').trim();
+  return /^#[0-9a-f]{6}$/i.test(color) ? color.toLowerCase() : '';
+}
+
 export function createCue(overrides = {}) {
+  const type = ['command', 'trigger', 'audio'].includes(overrides.type) ? overrides.type : 'command';
+  const audioAction = ['play', 'pause', 'stop'].includes(overrides.audioAction) ? overrides.audioAction : 'play';
   return {
-    id: overrides.id || id('cue'), number: String(overrides.number ?? '1'), hotkey: String(overrides.hotkey ?? '').slice(0, 1),
+    id: overrides.id || id('cue'), name: String(overrides.name ?? overrides.number ?? 'Cue 1'), type, audioAction,
+    targetGroupName: String(overrides.targetGroupName ?? ''), targetCueName: String(overrides.targetCueName ?? ''), targetAction: ['start', 'pause', 'stop'].includes(overrides.targetAction) ? overrides.targetAction : 'start', hotkey: String(overrides.hotkey ?? '').slice(0, 1),
     command: String(overrides.command ?? ''), ltcTrigger: String(overrides.ltcTrigger ?? ''), cron: String(overrides.cron ?? ''),
     beforeWaitMs: Math.max(0, Number(overrides.beforeWaitMs) || 0), afterWaitMs: Math.max(0, Number(overrides.afterWaitMs) || 0),
     status: 'IDLE', beforeProgress: 0, afterProgress: 0, startedAt: null
@@ -27,24 +35,45 @@ export function createGroup(overrides = {}) {
     id: overrides.id || id('group'), name: String(overrides.name ?? 'Cue Group'), expanded: overrides.expanded !== false,
     loopEnabled: Boolean(overrides.loopEnabled), clockEnabled: Boolean(overrides.clockEnabled),
     timecodeEnabled: Boolean(overrides.timecodeEnabled), hotkeyEnabled: Boolean(overrides.hotkeyEnabled),
-    cues: cues.map(createCue)
+    backgroundColor: normalizeBackgroundColor(overrides.backgroundColor),
+    cues: cues.map((cue, index) => createCue({...cue, name: cue?.name ?? cue?.number ?? `Cue ${index + 1}`}))
   };
 }
 
 export function createDefaultGroups() {
-  return [createGroup({ name: 'Main Sequence', cues: [createCue({ number: '1', command: 'welcome/', afterWaitMs: 500 })] })];
+  return [createGroup({ name: 'Main Sequence', cues: [createCue({ name: 'Welcome', command: '/cue/welcome/', afterWaitMs: 500 })] })];
+}
+
+export function normalizedName(value) { return String(value ?? '').trim().toLocaleLowerCase(); }
+
+export function validateUniqueNames(groups) {
+  const groupNames = new Set();
+  for (const group of groups) {
+    const groupName = normalizedName(group.name);
+    if (!groupName) throw new Error('Every cue group must have a name.');
+    if (groupNames.has(groupName)) throw new Error(`Duplicate cue group name: ${group.name}.`);
+    groupNames.add(groupName);
+    const cueNames = new Set();
+    for (const cue of group.cues) {
+      const cueName = normalizedName(cue.name);
+      if (!cueName) throw new Error(`Every cue in ${group.name} must have a name.`);
+      if (cueNames.has(cueName)) throw new Error(`Duplicate cue name in ${group.name}: ${cue.name}.`);
+      cueNames.add(cueName);
+    }
+  }
+  return groups;
 }
 
 export function hydrateGroups(value) {
   if (!Array.isArray(value)) throw new Error('Imported MiniQ cue lists must be a JSON array.');
-  return value.map((group) => {
+  return validateUniqueNames(value.map((group) => {
     if (!group || typeof group !== 'object' || !Array.isArray(group.cues)) throw new Error('Each cue group must contain a cues array.');
     return createGroup(group);
-  });
+  }));
 }
 
 export function toPersistedGroups(groups) {
-  return groups.map(({ cues, ...group }) => ({ ...group, cues: cues.map(({ status, beforeProgress, afterProgress, startedAt, ...cue }) => cue) }));
+  return groups.map(({ cues, localAudioFile, audioTrack, ...group }) => ({ ...group, cues: cues.map(({ number, status, beforeProgress, afterProgress, startedAt, phaseStartedAt, ...cue }) => cue) }));
 }
 
 export function readStoredGroups(storage) {

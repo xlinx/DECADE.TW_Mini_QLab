@@ -6,4 +6,7 @@ test('renders the global cue controls', () => {
   render(<MiniQLab />);
   expect(screen.getByRole('button', { name: 'GO-ALL' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'STOP-ALL' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Q-Group +' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Reset' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument();
 });

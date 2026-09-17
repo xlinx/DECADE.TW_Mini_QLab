@@ -5,7 +5,18 @@
 @layer base {
   :root { color-scheme: light; }
   :root.dark { color-scheme: dark; }
-  body { @apply m-0 min-w-[320px] bg-slate-100 font-sans antialiased dark:bg-slate-950; }
+  body { @apply m-0 min-w-[320px] bg-slate-100 font-sans text-base antialiased dark:bg-slate-950; }
   button, label, input { -webkit-tap-highlight-color: transparent; }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+}
+
+@keyframes toggle-bounce {
+  35% { transform: scale(.93); }
+  70% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+@layer utilities {
+  .toggle-bounce { animation: toggle-bounce 180ms ease-out; }
+  @media (prefers-reduced-motion: reduce) { .toggle-bounce { animation: none; } }
 }

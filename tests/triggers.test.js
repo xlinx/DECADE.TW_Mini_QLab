@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { createTriggerGate, isCronDue, matchingTriggeredCues } from '../src/lib/triggers.js';
+import { createTriggerGate, isCronDue, matchingTriggeredCues, nextCronRun } from '../src/lib/triggers.js';
 
 test('suppresses duplicate observations until their value changes', () => {
   const gate = createTriggerGate();
@@ -21,4 +21,11 @@ test('matches only cues in enabled trigger modes', () => {
   const groups = [{ id: 'g', name: 'Act', timecodeEnabled: true, hotkeyEnabled: true, clockEnabled: false, cues: [{ id: 'c', ltcTrigger: '01:00:00:00', hotkey: 'g', cron: '* * * * * *' }] }];
   const matched = matchingTriggeredCues(groups, { timecode: '01:00:00:00', key: 'g', date: new Date('2026-09-03T00:00:00Z') });
   expect(matched.map(item => item.source)).toEqual(['timecode', 'hotkey']);
+});
+
+test('reports the next cron run for valid expressions and null otherwise', () => {
+  const from = new Date('2026-09-03T00:00:00Z');
+  expect(nextCronRun('* * * * * *', from)?.toISOString()).toBe('2026-09-03T00:00:01.000Z');
+  expect(nextCronRun('not a cron', from)).toBeNull();
+  expect(nextCronRun('', from)).toBeNull();
 });
