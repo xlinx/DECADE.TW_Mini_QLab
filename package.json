@@ -12,6 +12,28 @@
     ".": "./dist-npm/mini-qlab.js",
     "./styles.css": "./dist-npm/style.css"
   },
+  "homepage": "https://decade.tw/qlab",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xlinx/DECADE.TW_Mini_QLab.git"
+  },
+  "private": false,
+  "author": "YSLin <xlinx@decade.tw>",
+  "contributors": [
+    {
+      "name": "YSLin",
+      "email": "xlinx@decade.tw"
+    }
+  ],
+  "license": "MIT",
+  "keywords": [
+    "qlab",
+    "timeline",
+    "cue",
+    "dmx"
+  ],
+
+
   "scripts": {
     "global_pnpm": "rm -rf node_modules .pnpm && pnpm config set virtualStoreType global --location global && pnpm install",
 
