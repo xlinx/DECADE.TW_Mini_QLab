@@ -1,16 +1,16 @@
 {
   "name": "mini-qlab",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "type": "module",
-  "description": "Browser-based cue-list controller for React",
+  "description": "Browser-based cue-list controller for React - DECADE.TW",
   "files": [
     "dist"
   ],
-  "main": "electron/main.js",
-  "module": "./dist/mini-qlab.js",
+  "main": "./dist-npm/mini-qlab.js",
+  "module": "./dist-npm/mini-qlab.js",
   "exports": {
-    ".": "./dist/mini-qlab.js",
-    "./styles.css": "./dist/style.css"
+    ".": "./dist-npm/mini-qlab.js",
+    "./styles.css": "./dist-npm/style.css"
   },
   "scripts": {
     "global_pnpm": "rm -rf node_modules .pnpm && pnpm config set virtualStoreType global --location global && pnpm install",
