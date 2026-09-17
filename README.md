@@ -13,6 +13,7 @@ device transport.
 <hr/>
 
 ## 💡Update Log
+* [added] | 🟢 add timeline
 * [added] | 🟢 add websocket support
 * [modify] | remove antd lib
 * [added] | 🟢 standalone Mini-QLab App by Electron
@@ -37,17 +38,12 @@ device transport.
 
 <hr/>
 
-## 💡Screenshot
-- try online: https://www.decade.tw/qlab
+## 💡Screenshot 
+- online-demo https://www.decade.tw/qlab
+<hr>
+
 ![timeline.png](imges/timeline.png)
-### [Main] Mini-Q standalone App (mac/win/linux)
-![image](imges/mini-q-electron.png)
-### [Main] Cue List - HotKey/Cron/LTC/Loop
-![image](imges/All.png)
-### [add]Active Cue - side window
-![image](imges/ActiveCue.png)
-### [add]HotKey
-![image](imges/HotKey.png)
+ 
 ### [add] LTC - Select Audio Device
 ![image](imges/SelectAD.png)
 
