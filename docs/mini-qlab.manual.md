@@ -12,6 +12,17 @@ Mini-QLab is a QLab(https://qlab.app/) like  browser-based cue-list controller f
 
 ### 2. Install and run
 
+#### Instant Run with npx (Zero Installation)
+
+```bash
+npx mini-qlab
+# Options:
+# npx mini-qlab -p 8080       (Custom port)
+# npx mini-qlab --no-open     (Headless / do not open browser)
+```
+
+#### Local Development
+
 ```bash
 npm install
 npm run dev
@@ -34,6 +45,7 @@ npm test
 | Q-Group + / - | Adds or removes cue groups. |
 | Reset | Restores the default group configuration. |
 | Export / Import | Downloads or uploads the cue-group JSON configuration. |
+| WS + host + port | (In the Cue log card) Connects to a WebSocket endpoint. Each dispatched cue sends `{ command, timestamp }` as JSON. The status pill shows `Off`, `Connecting`, `Connected`, or `Error`. A `WS` badge appears in the cue log when the entry was delivered. |
 
 ### 4. Cue groups
 
@@ -59,15 +71,15 @@ Each row is one cue. The table uses Tailwind `table-auto`; columns with a config
 | Command | Editable command/name. A trailing `/` is added when this field is edited. |
 | LTC Trigger | Timecode target and current countdown. |
 | Clock | Cron expression plus calculated next-run/countdown information. |
-| Wait(ms) | Delay before the cue fires during a sequence. |
-| Progress | Cue wait progress. |
+| Before-wait(ms) | While the cue is `LIVE`, the before-wait counts down before the cue is dispatched. A 3px progress bar under the column shows its percentage. |
+| After-wait(ms) | After dispatch, the after-wait counts down before the next cue begins. A 3px progress bar under the column shows its percentage. |
 | Actions | Insert below, move up, move down, and delete the cue. |
 
 ### 6. Running cues
 
-1. Edit the cue command and wait time.
+1. Edit the cue command, before-wait, and after-wait.
 2. Press **GO** on a group, or use **GO-ALL**.
-3. Cues run in table order. A cue becomes `LIVE` while waiting, then `DONE` when dispatched.
+3. Cues run in table order. A cue becomes `LIVE` while its before-wait counts down, is dispatched at zero, then becomes `DONE` while its after-wait counts down before the next cue begins. Triggered cues (cron, TC/LTC, hotkey) follow the same before/after-wait rule.
 4. Press **STOP** or **STOP-ALL** to stop the active sequence.
 5. If Loop is enabled, a successfully completed group begins again until stopped.
 
@@ -125,6 +137,17 @@ Mini-QLab is QLab like(https://qlab.app/) 是一套以瀏覽器執行的 Cue Lis
 
 ### 2. 安裝與啟動
 
+#### 透過 npx 免安裝直接啟動
+
+```bash
+npx mini-qlab
+# 選項：
+# npx mini-qlab -p 8080       (自訂連接埠)
+# npx mini-qlab --no-open     (不自動開啟瀏覽器)
+```
+
+#### 本地端開發
+
 ```bash
 npm install
 npm run dev
@@ -147,6 +170,7 @@ npm test
 | Q-Group + / - | 新增或刪除 Cue 群組。 |
 | Reset | 還原預設群組設定。 |
 | Export / Import | 下載或上傳 Cue 群組 JSON 設定。 |
+| WS + host + port | （Cue log 卡片內）連接 WebSocket 端點。每次 Cue 送出時將 `{ command, timestamp }` 以 JSON 傳送。狀態丸顯示 `Off`、`Connecting`、`Connected` 或 `Error`。Cue log 在成功送出時顯示 `WS` 徽章。 |
 
 ### 4. Cue 群組
 
@@ -172,15 +196,15 @@ npm test
 | Command | 可編輯的命令／名稱；編輯時會自動補上結尾 `/`。 |
 | LTC Trigger | 時間碼目標與目前倒數。 |
 | Clock | Cron 表達式，以及下一次執行／倒數資訊。 |
-| Wait(ms) | 序列執行時，Cue 送出前的等待時間。 |
-| Progress | Cue 等待進度。 |
+| Before-wait(ms) | Cue 為 `LIVE` 時，before-wait 倒數歸零後才送出該 Cue。欄位下方的 3px 進度條顯示其百分比。 |
+| After-wait(ms) | 送出後，after-wait 倒數歸零前才會開始下一個 Cue。欄位下方的 3px 進度條顯示其百分比。 |
 | Actions | 在下方插入、上移、下移與刪除 Cue。 |
 
 ### 6. 執行 Cue
 
-1. 編輯 Cue 的 Command 與 Wait 時間。
+1. 編輯 Cue 的 Command、Before-wait 與 After-wait。
 2. 按群組的 **GO**，或按 **GO-ALL**。
-3. Cue 會依表格順序執行；等待時為 `LIVE`，送出後為 `DONE`。
+3. Cue 會依表格順序執行：before-wait 倒數時為 `LIVE`，歸零時送出該 Cue，送出後為 `DONE` 並倒數 after-wait，歸零後才開始下一個 Cue。觸發式 Cue（Clock、TC/LTC、Hotkey）同樣遵循 before/after-wait 規則。
 4. 按 **STOP** 或 **STOP-ALL** 可停止目前序列。
 5. 若啟用 Loop，群組正常完成後會持續重新執行，直到停止為止。
 

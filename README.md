@@ -12,6 +12,10 @@ are never uploaded or sent through WebSocket, and must be selected again after
 a page reload or cue-list import.
 
 - try online: https://www.decade.tw/qlab
+- run instantly with npx (zero installation):
+  ```bash
+  npx mini-qlab
+  ```
 - with websocket support
     - default ws send to 127.0.0.1 port 8080
 - udp/osc u need implement by npm on ur code
@@ -66,6 +70,48 @@ initAudioDevice({deviceName: 'aggX1',onFrame:onFrame});
 
 ```
 
+## 🚀 Run Instantly with `npx` (User Manual)
+
+Anyone with [Node.js](https://nodejs.org/) (v18+) installed can run Mini QLab immediately with zero installation:
+
+```bash
+npx mini-qlab
+```
+
+This single command will:
+1. Start a local high-performance web server.
+2. Automatically launch your default web browser to `http://localhost:3000`.
+3. Display both **Local** and **Network** URLs so other devices (tablets, phones, auxiliary consoles) on the same Wi-Fi or LAN can access the control surface simultaneously.
+
+### CLI Options
+
+| Option | Short | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `--port <number>` | `-p` | `3000` | Specify server port (automatically retries next open port if taken) |
+| `--host <string>` | | `0.0.0.0` | Host to bind (`0.0.0.0` for LAN sharing, `127.0.0.1` for local only) |
+| `--no-open` | | `false` | Run server in headless mode without opening the browser |
+| `--version` | `-v` | | Print current version |
+| `--help` | `-h` | | Print CLI options and usage |
+
+### Examples
+
+```bash
+# Default: launches on port 3000 and opens browser
+npx mini-qlab
+
+# Specify custom port (e.g. 8080)
+npx mini-qlab -p 8080
+
+# Headless mode for remote machines or background services
+npx mini-qlab --no-open
+
+# Restrict to localhost only
+npx mini-qlab --host 127.0.0.1
+
+# Stop the server:
+# Press Ctrl + C
+```
+
 <hr/>
 
 ## Library usage
@@ -92,7 +138,7 @@ export function ShowControl() {
 sources are `sequence`, `cron`, `timecode`, and `hotkey`. `rxJson` is optional;
 provide `RX_JSON.TC.string` in that shape to use TC/LTC triggers.
 
-See the bilingual [Mini QLab manual](./mini-qlab.manual.md) for complete
+See the bilingual [Mini QLab manual](./docs/mini-qlab.manual.md) for complete
 controls, configuration, and limitations.
 
 
@@ -124,30 +170,3 @@ npm run build
     * https://civitai.com/articles/7090/share-sd-img-to-3rd-software-gpu-share-memory-realtime-spout-or-syphon
 * DECADE.TW
     * https://decade.tw
-
-## Library usage
-
-```jsx
-import MiniQLab from 'mini-qlab';
-import 'mini-qlab/styles.css';
-
-export function ShowControl() {
-  return (
-    <MiniQLab
-      rxJson={{ TC: { string: '01:00:00:00' } }}
-      onEvent={(event) => {
-        if (event.type === 'cue:dispatched') {
-          console.log(event.source, event.command);
-        }
-      }}
-    />
-  );
-}
-```
-
-`onEvent` receives sequence lifecycle events and cue dispatches. Dispatch
-sources are `sequence`, `cron`, `timecode`, and `hotkey`. `rxJson` is optional;
-provide `RX_JSON.TC.string` in that shape to use TC/LTC triggers.
-
-See the bilingual [Mini QLab manual](./mini-qlab.manual.md) for complete
-controls, configuration, and limitations.
